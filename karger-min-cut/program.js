@@ -1,7 +1,8 @@
 const fs = require('fs');
 
+
 function readInput() {
-    let rawInput = fs.readFileSync('test', 'utf8')
+    let rawInput = fs.readFileSync('input', 'utf8')
     let listStr = rawInput.split("\n");
     listStr.splice(listStr.length - 1, 1)
     return listStr;
@@ -39,7 +40,7 @@ function introduceNewNode(graph, n1, n2) {
     let newNode = 1000 * (n1 + n2)
     let newNodeList = graph.nodes.filter(x => x != n1 && x != n2).concat([newNode])
     let newEdgeList = graph.edges.map(x => {
-        return x.map(y => {return (y == n1 || y == n2) ? newNode : y})
+        return x.map(y => { return (y == n1 || y == n2) ? newNode : y })
     })
     return {
         nodes: newNodeList,
@@ -56,17 +57,22 @@ function mergedNodes(graph, edge) {
 }
 
 function contract(graph) {
-    if (graph.edges <= 2) return graph
+    if (graph.nodes.length <= 2) return graph
     let edge = pickEdge(graph.edges)
-    console.log(graph, edge)
-    let contractedGraph = mergedNodes(graph,edge)
-    console.log(contractedGraph)
-    //contract(contractedGraph)
+    let contractedGraph = mergedNodes(graph, edge)
+    return contract(contractedGraph)
 }
 
 function doTheStuff() {
     let graph = genGraph()
-    contract(graph)
+    
+    let minCutGraph = graph
+    for (i = 0; i < 2; i++) {
+        let contractedGraph = contract(graph)
+        if (contractedGraph.edges.length < minCutGraph.edges.length)
+            minCutGraph = contractedGraph
+    }
+    console.log(minCutGraph.edges.length)
 }
 
 doTheStuff()
