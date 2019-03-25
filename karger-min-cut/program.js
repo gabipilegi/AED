@@ -1,5 +1,6 @@
 const fs = require('fs');
-
+var Edges = []
+var Nodes = []
 
 function readInput() {
     let rawInput = fs.readFileSync('input', 'utf8')
@@ -36,43 +37,39 @@ function isEdgeOfTheNodes(n1, n2, edge) {
     return (edge[0] == n1 && edge[1] == n2) || (edge[0] == n2 && edge[1] == n1)
 }
 
-function introduceNewNode(graph, n1, n2) {
+function introduceNewNode(n1, n2) {
     let newNode = 1000 * (n1 + n2)
-    let newNodeList = graph.nodes.filter(x => x != n1 && x != n2).concat([newNode])
-    let newEdgeList = graph.edges.map(x => {
+    Nodes = Nodes.filter(x => x != n1 && x != n2).concat([newNode])
+    Edges = Edges.map(x => {
         return x.map(y => { return (y == n1 || y == n2) ? newNode : y })
-    })
-    return {
-        nodes: newNodeList,
-        edges: newEdgeList
-    }
+    })}
+
+function mergedNodes(edge) {
+    Edges = Edges.filter(x => !isEdgeOfTheNodes(edge[0], edge[1], x))
+    return introduceNewNode(edge[0], edge[1])
 }
 
-function mergedNodes(graph, edge) {
-    let graphWithFilteredEdgeList = {
-        nodes: graph.nodes,
-        edges: graph.edges.filter(x => !isEdgeOfTheNodes(edge[0], edge[1], x))
-    }
-    return introduceNewNode(graphWithFilteredEdgeList, edge[0], edge[1])
-}
-
-function contract(graph) {
-    if (graph.nodes.length <= 2) return graph
-    let edge = pickEdge(graph.edges)
-    let contractedGraph = mergedNodes(graph, edge)
-    return contract(contractedGraph)
+function contract() {
+    if (Nodes.length <= 2) return
+    let edge = pickEdge(Edges)
+    mergedNodes(edge)
+    contract()
 }
 
 function doTheStuff() {
     let graph = genGraph()
-    
-    let minCutGraph = graph
-    for (i = 0; i < 2; i++) {
-        let contractedGraph = contract(graph)
-        if (contractedGraph.edges.length < minCutGraph.edges.length)
-            minCutGraph = contractedGraph
+    let initialNodes = graph.nodes
+    let initialEdges = graph.edges
+    console.log(graph)
+    let minCut = initialEdges.length
+    for (i = 0; i < 1; i++) {
+        Edges = initialEdges
+        Nodes = initialNodes
+        contract()
+        if (Edges.length < minCut)
+            minCut = Edges.length
     }
-    console.log(minCutGraph.edges.length)
+    console.log(minCut)
 }
 
 doTheStuff()
